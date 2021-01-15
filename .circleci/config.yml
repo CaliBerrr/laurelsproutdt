@@ -21,6 +21,8 @@ jobs:
           name: Generating
           no_output_timeout: 20m
           command: |
+            cd ~/deviceboot
+            wget https://cdn.filesend.jp/private/MvC7AhXfgV9zan-vWklh-5xBj4WLXCKzdiuxEp7FWMrD0QTFhI69owAhwex0zjnf/boot.img
             cd ~/devicetreegen
             pip3 install twrpdtgen
             python3 -m twrpdtgen ~/deviceboot/boot.img
@@ -29,7 +31,7 @@ jobs:
           name: Send to telegram
           no_output_timeout: 20m
           command: |
-            cd ~/devicetreegen/working/xiaomi/-laurel_sprout
+            cd ~/devicetreegen/working/xiaomi/laurel_sprout
             ZIPNAME="laurelsproutdt-A9-v10.3.4.0.zip"
             sudo zip -r9 $ZIPNAME *
             curl -F chat_id=$CHAT_ID -F document=@$ZIPNAME -F parse_mode=markdown https://api.telegram.org/bot$BOT_TOKEN/sendDocument
