@@ -1,0 +1,34 @@
+version: 2.1 jobs: laurel_sproutdt: docker: - image: 
+      ubuntu:18.04
+   steps: - run: name: Preparing Environment 
+          no_output_timeout: 20m command: |
+           export TERM=xterm apt-get update -y && ln 
+           -sf /usr/share/zoneinfo/Asia/Dhaka 
+           /etc/localtime && apt-get install bison 
+           build-essential curl flex git zip 
+           zlib1g-dev bzip2 python3 python3-pip cpio 
+           wget sudo libssl-dev openssl -y
+      - run: name: Downloading dependencies & source 
+          no_output_timeout: 20m command: |
+            cd ~ git clone 
+            https://github.com/SebaUbuntu/TWRP-device-tree-generator 
+            --depth=1 devicetreegen git clone 
+            https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME 
+            --depth=1 deviceboot
+      - run: name: Generating no_output_timeout: 20m 
+          command: |
+            cd ~/devicetreegen pip3 install 
+            twrpdtgen python3 -m twrpdtgen 
+            ~/deviceboot/boot.img
+      
+      - run: name: Send to telegram 
+          no_output_timeout: 20m command: |
+            cd 
+            ~/devicetreegen/working/xiaomi/-laurel_sprout 
+            ZIPNAME="laurelsproutdt-A9-v10.3.4.0.zip" 
+            sudo zip -r9 $ZIPNAME * curl -F 
+            chat_id=$CHAT_ID -F document=@$ZIPNAME 
+            -F parse_mode=markdown 
+            https://api.telegram.org/bot$BOT_TOKEN/sendDocument
+workflows: version: 2.1 cooking: jobs:
+      - laurel_sproutdt
