@@ -1,6 +1,6 @@
 version: 2.1
 jobs:
-  laurel_sproutdt:
+  buildtc:
    docker:
       - image: ubuntu:18.04
    steps:
@@ -9,34 +9,22 @@ jobs:
           no_output_timeout: 20m
           command: |
            export TERM=xterm
-           apt-get update -y && ln -sf /usr/share/zoneinfo/Asia/Dhaka /etc/localtime && apt-get install bison build-essential curl flex git zip zlib1g-dev bzip2 python3 python3-pip cpio wget sudo libssl-dev openssl -y
+           apt-get update -y && ln -sf /usr/share/zoneinfo/Asia/Dhaka /etc/localtime && apt-get install bison build-essential curl flex git zip zlib1g-dev bzip2 python3 python3-pip cpio wget sudo libssl-dev openssl bc bison ca-certificates ccache clang cmake curl file flex gcc g++ git libelf-dev libssl-dev make ninja-build python3 texinfo u-boot-tools xz-utils zlib1g-dev lld -y
       - run:
           name: Downloading dependencies & source
           no_output_timeout: 20m
           command: |
             cd ~
-            git clone https://github.com/SebaUbuntu/TWRP-device-tree-generator --depth=1 devicetreegen
-            git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME --depth=1 deviceboot
+            git clone https://github.com/kdrag0n/proton-clang-build --depth=1 buildtc
+            git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME --depth=1 useless
       - run:
           name: Generating
           no_output_timeout: 20m
           command: |
-            cd ~/deviceboot
-            wget https://cdn.filesend.jp/private/MvC7AhXfgV9zan-vWklh-5xBj4WLXCKzdiuxEp7FWMrD0QTFhI69owAhwex0zjnf/boot.img
-            cd ~/devicetreegen
-            pip3 install twrpdtgen
-            python3 -m twrpdtgen ~/deviceboot/boot.img
-      
-      - run:
-          name: Send to telegram
-          no_output_timeout: 20m
-          command: |
-            cd ~/devicetreegen/output/xiaomi/laurel_sprout
-            ZIPNAME="laurelsproutdt-A9-v10.3.4.0.zip"
-            sudo zip -r9 $ZIPNAME *
-            curl -F chat_id=$CHAT_ID -F document=@$ZIPNAME -F parse_mode=markdown https://api.telegram.org/bot$BOT_TOKEN/sendDocument
+            cd ~/buildtc
+            bash build-toolchain.sh     
 workflows:
   version: 2.1
   cooking:
     jobs:
-      - laurel_sproutdt
+      - buildtc
