@@ -9,11 +9,19 @@ jobs:
           no_output_timeout: 20m
           command: |
            export TERM=xterm
-           apt-get update -y && ln -sf /usr/share/zoneinfo/Asia/Dhaka /etc/localtime && apt-get install bison build-essential curl flex git zip zlib1g-dev bzip2 python3 python3-pip cpio wget sudo libssl-dev openssl bc bison ca-certificates ccache clang cmake curl file flex gcc g++ git libelf-dev libssl-dev make ninja-build python3 texinfo u-boot-tools xz-utils zlib1g-dev lld -y
+           apt-get update -y && ln -sf /usr/share/zoneinfo/Asia/Dhaka /etc/localtime && apt-get install bison build-essential curl flex git zip zlib1g-dev bzip2 python3 python3-pip cpio wget sudo libssl-dev openssl bc bison ca-certificates ccache clang curl file flex gcc g++ git libelf-dev libssl-dev make ninja-build python3 texinfo u-boot-tools xz-utils zlib1g-dev lld -y
       - run:
           name: Downloading dependencies & source
           no_output_timeout: 20m
           command: |
+            cd ~
+            sudo apt install build-essential libssl-dev
+            wget https://github.com/Kitware/CMake/releases/download/v3.16.5/cmake-3.16.5.tar.gz
+            tar -zxvf cmake-3.16.5.tar.gz
+            cd cmake-3.16.5
+            ./bootstrap
+            make 
+            sudo make install 
             cd ~
             git clone https://github.com/kdrag0n/proton-clang-build --depth=1 buildtc
             git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME --depth=1 useless
