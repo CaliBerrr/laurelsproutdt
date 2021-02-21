@@ -16,14 +16,14 @@ jobs:
           command: |
             sudo apt install build-essential libssl-dev
             cd ~
-            git clone https://github.com/kdrag0n/proton-clang-build --depth=1 buildtc
+            git clone https://github.com/termux/termux-packages --depth=1 build
             git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME --depth=1 useless
       - run:
           name: Generating
           no_output_timeout: 20m
           command: |
-            cd ~/buildtc
-            bash build-toolchain.sh     
+            cd ~/build
+            bash build-all.sh     
 workflows:
   version: 2.1
   cooking:
