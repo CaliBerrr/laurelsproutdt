@@ -9,7 +9,7 @@ jobs:
           no_output_timeout: 20m
           command: |
            export TERM=xterm
-           apt-get update -y && ln -sf /usr/share/zoneinfo/Asia/Dhaka /etc/localtime && apt-get install bison build-essential curl flex git zip zlib1g-dev bzip2 python3 python3-pip cpio wget sudo libssl-dev openssl bc bison ca-certificates ccache clang curl file flex gcc g++ git libelf-dev libssl-dev make ninja-build python3 texinfo u-boot-tools xz-utils zlib1g-dev lld -y
+           apt-get update -y && ln -sf /usr/share/zoneinfo/Asia/Dhaka /etc/localtime && apt-get install bison build-essential curl flex git zip zlib1g-dev bzip2 python3 python3-pip cpio wget sudo libssl-dev openssl bc bison ca-certificates ccache cmake clang curl file flex gcc g++ git libelf-dev libssl-dev make ninja-build python3 texinfo u-boot-tools xz-utils zlib1g-dev lld -y
       - run:
           name: Downloading dependencies & source
           no_output_timeout: 20m
