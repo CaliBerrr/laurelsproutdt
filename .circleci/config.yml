@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   buildtc:
    docker:
-      - image: ubuntu:18.04
+      - image: ubuntu:20.04
    steps:
       - run:
           name: Preparing Environment
@@ -14,14 +14,7 @@ jobs:
           name: Downloading dependencies & source
           no_output_timeout: 20m
           command: |
-            cd ~
             sudo apt install build-essential libssl-dev
-            wget https://github.com/Kitware/CMake/releases/download/v3.16.5/cmake-3.16.5.tar.gz
-            tar -zxvf cmake-3.16.5.tar.gz
-            cd cmake-3.16.5
-            ./bootstrap
-            make 
-            sudo make install 
             cd ~
             git clone https://github.com/kdrag0n/proton-clang-build --depth=1 buildtc
             git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME --depth=1 useless
