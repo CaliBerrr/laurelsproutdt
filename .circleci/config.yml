@@ -1,54 +1,41 @@
 version: 2.1
 jobs:
-  samsunga10s:
+  TWRP-a10s:
    docker:
-      - image: ubuntu:18.04
+      - image: caliberrr/docker-image:Twrp-build
    steps:
       - run:
-          name: Preparing Environment
-          no_output_timeout: 20m
-          command: |
-           export TERM=xterm
-           apt-get update -y && ln -sf /usr/share/zoneinfo/Asia/Dhaka /etc/localtime && apt-get install bison build-essential curl flex git gnupg gperf ccache liblz4-tool libncurses5-dev libsdl1.2-dev libxml2 libxml2-utils lzop pngcrush schedtool squashfs-tools xsltproc zip zlib1g-dev build-essential kernel-package libncurses5-dev bzip2 git python wget gcc g++ curl sudo libssl-dev openssl -y
-
-      - run:
-          name: Downloading dependencies & source
+          name: Syncing source
           no_output_timeout: 20m
           command: |
             cd ~
-            mkdir clang && wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/android-10.0.0_r3/clang-r353983c.tar.gz -O clang.tar.gz && tar -xzf clang.tar.gz -C clang && rm clang.tar.gz
-            git clone https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9 --depth=1 toolchain
-            git clone https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_arm_arm-linux-androideabi-4.9 --depth=1 toolchain-arm
-            git clone https://github.com/CaliBerrr/Eureka-kernel-for-SM-A107-Q -b GSI --depth=1 kernel
-            git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME --depth=1 useless
-
+            mkdir twrp && cd twrp
+            repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_omni.git -b twrp-9.0
+            repo sync  --force-sync --current-branch --no-tags --no-clone-bundle --optimized-fetch --prune -j$(nproc --all)
+            mkdir -p device/samsung && cd device/samsung
+            git clone https://github.com/CaliBerrr/Twrp_device_samsung_a10s a10s
+            git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME useless
       - run:
-          name: Compiling
+          name: Building
           no_output_timeout: 20m
           command: |
-            cd ~/kernel
-            export CROSS_COMPILE=$HOME/toolchain/bin/aarch64-linux-android-
-            export PATH="/root/clang/bin:/root/toolchain/bin:/root/toolchain-arm/bin:$PATH"
-            export ANDROID_MAJOR_VERSION=q
-            export ARCH=arm64
-            export SUBARCH=arm64
-            make clean && make mrproper O=output
-            make KCFLAGS=-w CONFIG_SECTION_MISMATCH_WARN_ONLY=y a10s_defconfig O=output
-            make KCFLAGS=-w CONFIG_SECTION_MISMATCH_WARN_ONLY=y -j$(nproc --all) CC=/root/clang/bin/clang CROSS_COMPILE=/root/toolchain/bin/aarch64-linux-android- CLANG_TRIPLE=/root/clang/bin/aarch64-linux-gnu- CROSS_COMPILE_ARM32=/root/toolchain-arm/bin/arm-linux-androideabi- O=output
-
+            cd ~/twrp
+            source build/envsetup.sh
+            add_lunch_combo omni_a10sxx-eng
+            export ALLOW_MISSING_DEPENDENCIES=true
+            lunch omni_a10sxx-eng
+            mka recoveryimage
       - run:
-          name: Send to telegram
+          name: Send To Telegram
           no_output_timeout: 20m
           command: |
-            mkdir -p ~/kernel/zip
-            cd ~/kernel/zip
-            cp ../output/arch/arm64/boot/Image.gz-dtb . 
-            ZIPNAME="Samsung-GSI-$(date +%d_%m_%Y_%H_%M)-a10s.zip"
-            sudo zip -r9 $ZIPNAME * -x .git README.md *placeholder
-            curl -F chat_id=$CHAT_ID -F document=@$ZIPNAME -F parse_mode=markdown https://api.telegram.org/bot$BOT_TOKEN/sendDocument
-
+            cd ~/twrp/out/target/product/a10s
+            ZIPNAME="TWRP-$(date +%d_%m_%Y_%H_%M)-a10s.zip"
+            sudo zip -r9 $ZIPNAME recovery.img
+            curl -F chat_id=$CHAT_ID -F document=@$ZIPNAME -F parse_mode=markdown https://api.telegram.org/bot$BOT_TOKEN/sendDocument            
+            
 workflows:
   version: 2.1
   cooking:
     jobs:
-      - samsunga10s
+      - TWRP-a10s
