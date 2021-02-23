@@ -13,7 +13,7 @@ jobs:
             repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_omni.git -b twrp-9.0
             repo sync  --force-sync --current-branch --no-tags --no-clone-bundle --optimized-fetch --prune -j$(nproc --all)
             mkdir -p device/samsung && cd device/samsung
-            git clone https://github.com/CaliBerrr/Twrp_device_samsung_a10s a10s
+            git clone https://github.com/CaliBerrr/Twrp_device_samsung_a10s a10sxx
             git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME useless
       - run:
           name: Building
@@ -29,7 +29,7 @@ jobs:
           name: Send To Telegram
           no_output_timeout: 20m
           command: |
-            cd ~/twrp/out/target/product/a10s
+            cd ~/twrp/out/target/product/a10sxx
             ZIPNAME="TWRP-$(date +%d_%m_%Y_%H_%M)-a10s.zip"
             sudo zip -r9 $ZIPNAME recovery.img
             curl -F chat_id=$CHAT_ID -F document=@$ZIPNAME -F parse_mode=markdown https://api.telegram.org/bot$BOT_TOKEN/sendDocument            
