@@ -9,44 +9,27 @@ jobs:
           no_output_timeout: 20m
           command: |
            export TERM=xterm
-           apt-get update -y && ln -sf /usr/share/zoneinfo/Asia/Dhaka /etc/localtime && apt-get install bison build-essential curl flex git gnupg gperf ccache liblz4-tool libncurses5-dev libsdl1.2-dev libxml2 libxml2-utils lzop pngcrush schedtool squashfs-tools xsltproc zip zlib1g-dev build-essential kernel-package libncurses5-dev bzip2 git python wget gcc g++ curl sudo libssl-dev openssl -y
+           apt-get update -y && ln -sf /usr/share/zoneinfo/Asia/Dhaka /etc/localtime && apt-get install bison build-essential curl flex git gnupg gperf ccache liblz4-tool libncurses5-dev libsdl1.2-dev libxml2 libxml2-utils wget unzip zip -y
 
       - run:
           name: Downloading dependencies & source
           no_output_timeout: 20m
           command: |
             cd ~
-            mkdir clang && wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/android-10.0.0_r3/clang-r353983c.tar.gz -O clang.tar.gz && tar -xzf clang.tar.gz -C clang && rm clang.tar.gz
-            git clone https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9 --depth=1 toolchain
-            git clone https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_arm_arm-linux-androideabi-4.9 --depth=1 toolchain-arm
-            git clone https://github.com/0x300T/samsung_a10s --depth=1 kernel
             git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME --depth=1 useless
 
       - run:
           name: Compiling
           no_output_timeout: 20m
           command: |
-            cd ~/kernel
-            export CROSS_COMPILE=$HOME/toolchain/bin/aarch64-linux-android-
-            export PATH="/root/clang/bin:/root/toolchain/bin:/root/toolchain-arm/bin:$PATH"
-            export ANDROID_MAJOR_VERSION=q
-            export ARCH=arm64
-            export SUBARCH=arm64
-            make clean && make mrproper O=output
-            make KCFLAGS=-w CONFIG_SECTION_MISMATCH_WARN_ONLY=y a10s_defconfig O=output
-            make KCFLAGS=-w CONFIG_SECTION_MISMATCH_WARN_ONLY=y -j$(nproc --all) CC=/root/clang/bin/clang CROSS_COMPILE=/root/toolchain/bin/aarch64-linux-android- CLANG_TRIPLE=/root/clang/bin/aarch64-linux-gnu- CROSS_COMPILE_ARM32=/root/toolchain-arm/bin/arm-linux-androideabi- O=output
-
-      - run:
-          name: Send to telegram
-          no_output_timeout: 20m
-          command: |
-            mkdir -p ~/kernel/zip
-            cd ~/kernel/zip
-            cp ../output/arch/arm64/boot/Image.gz-dtb . 
-            ZIPNAME="Samsung-$(date +%d_%m_%Y_%H_%M)-a10s.zip"
-            sudo zip -r9 $ZIPNAME * -x .git README.md *placeholder
-            curl -F chat_id=$CHAT_ID -F document=@$ZIPNAME -F parse_mode=markdown https://api.telegram.org/bot$BOT_TOKEN/sendDocument
-
+            cd ~
+            wget https://mva2.androidfilehost.com/dl/8h9eNsgb-py_NZoLwhfC3A/1614152034/17248734326145705925/SM-A107F_1_20201229222934_93a2mqkxik_fac.zip
+            unzip SM-A107F_1_20201229222934_93a2mqkxik_fac.zip
+            cd SM-A107F_1_20201229222934_93a2mqkxik_fac
+            find . -name *.img
+            ls 
+            ls *
+            ls */*
 workflows:
   version: 2.1
   cooking:
