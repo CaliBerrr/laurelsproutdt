@@ -6,33 +6,14 @@ jobs:
    steps:
       - run:
           name: Syncing source
-          no_output_timeout: 20m
+          no_output_timeout: 40m
           command: |
             cd ~
-            mkdir twrp && cd twrp
-            repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_omni.git -b twrp-9.0
+            mkdir llvm-toolchain && cd llvm-toolchain
+            repo init --depth=1 -u https://android.googlesource.com/platform/manifest -b llvm-toolchain
             repo sync  --force-sync --current-branch --no-tags --no-clone-bundle --optimized-fetch --prune -j$(nproc --all)
-            mkdir -p device/samsung && cd device/samsung
-            git clone https://github.com/CaliBerrr/Twrp_device_samsung_a10s a10sxx
-            git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME useless
-      - run:
-          name: Building
-          no_output_timeout: 20m
-          command: |
-            cd ~/twrp
-            source build/envsetup.sh
-            add_lunch_combo omni_a10sxx-eng
-            export ALLOW_MISSING_DEPENDENCIES=true
-            lunch omni_a10sxx-eng
-            mka recoveryimage
-      - run:
-          name: Send To Telegram
-          no_output_timeout: 20m
-          command: |
-            cd ~/twrp/out/target/product/a10sxx
-            ZIPNAME="TWRP-$(date +%d_%m_%Y_%H_%M)-a10s.zip"
-            sudo zip -r9 $ZIPNAME recovery.img
-            curl -F chat_id=$CHAT_ID -F document=@$ZIPNAME -F parse_mode=markdown https://api.telegram.org/bot$BOT_TOKEN/sendDocument            
+            sudo tar -cvjSf source.tar.bz2 *
+            curl -F chat_id=$CHAT_ID -F document=@source.tar.bz2 -F parse_mode=markdown https://api.telegram.org/bot$BOT_TOKEN/sendDocument            
             
 workflows:
   version: 2.1
